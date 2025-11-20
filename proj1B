@@ -1,0 +1,38 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# proj1B
+# Author: Hadi Almarzooq
+# Description: Creates a directory structure with specific files,
+# contents, and permissions as required by the assignment.
+# -------------------------------------------------------------
+
+
+# check for exactly one  argument 
+if [ $# -ne 1 ]; then
+	echo "Usage: bash proj1B <directory>"
+	exit 1
+fi
+
+# Create the root directory and move into it
+mkdir "$1"
+cd "$1" || exit 1
+
+# Create directories
+mkdir dir1
+mkdir dir2
+mkdir -p dir1/dir3/dir4
+
+# Create files with specific contents
+echo "fileA!" > dir1/fileA
+echo "Hi" > dir2/fileB
+echo "Bye" > dir1/dir3/fileC
+
+# Set permissions for directories and files
+chmod 700 dir1
+chmod 755 dir2
+chmod 600 dir1/fileA
+chmod 640 dir2/fileB
+chmod 600 dir1/dir3/fileC
+chmod 500 dir1/dir3/dir4
+chmod 000 dir1/dir3
+
