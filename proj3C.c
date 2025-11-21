@@ -30,6 +30,20 @@ typedef struct
 } ArrayDictionary;
 
 
+//building helper functions
+// h1(key) -> starting index
+int h1(char *key, int tableSize){
+	unsigned long h = hash(unsigned char *)key);
+	return h % tableSize;
+}
+//h2(key) -> step size of probling
+int h2(char *key, int tableSize){
+	unsigned long h = hash(unsigned char *)key);
+	int step = 1 + (h % (tableSize - 1)); // make sure step != 0 common pattern
+	return step
+}
+
+
 // hasj function from stacoverflow.com
 unsigned long
 hash(unsigned char *str){
@@ -44,23 +58,52 @@ hash(unsigned char *str){
 
 typedef struct  {
 
+    // Add data members for hash table here.
+	char **key; // array of pointers to date strings
+	float *values; //array of floats
+	int size; // total number of slots in the table
+
+}HashTableDictionary;
 
 
+void HTInitialize(HashTableDictionary *ht, int numDates); {
 
-} HashTableDictionary;
+	//set the size
+	tableSize = 2 * numDates;
+	ht->size = 2 * numDates;
 
+	//allocate arrays
+	ht->keys = malloc(sizeof(char *) *  ht->size);
+	ht->values = malloc(sizeof(float) * ht->size);
 
-void HTInitialize {
+	// loop from 0 to ht->size - 1
+	for (int i = 0; i<size - 1; i++){
+		ht->keys[i] = NULL;
+		ht->values[i] = 0.0f; // just for cleanliness
 
 }
 
-void HTStore {
+void HTStore(HashTableDictionary *ht, char *key, float value); {
+
+	//compute
+	int index = h1(key, ht->size);
+	int step = h2(key, ht->size);
+	// loop up to ht->size times (to avoid infinite loop)
+	for(int i = 0; i<ht->size; i++){
 
 }
 
-void HTFetch {
+void HTFetch(HashTableDictionary *ht, char key); {
 
 }
+
+
+void AnalyzeWithHashTableDictionary(char **dates, float *values,int numDates)
+{
+
+
+}
+
 
 void Initialize(ArrayDictionary *ad)
 {
@@ -91,13 +134,6 @@ float Fetch(ArrayDictionary *ad, char *key)
 	}
    return 0.;
 }
-
-void AnalyzeWithHashTableDictionary(char **dates, float *values,int numDates)
-{
-
-
-}
-
 
 
 void AnalyzeWithArrayDictionary(char **dates, float *values, int numDates)
