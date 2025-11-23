@@ -30,21 +30,17 @@ typedef struct
 } ArrayDictionary;
 
 
-//building helper functions
-// h1(key) -> starting index
-int h1(char *key, int tableSize){
-	unsigned long h = hash(unsigned char *)key);
-	return h % tableSize;
-}
-//h2(key) -> step size of probling
-int h2(char *key, int tableSize){
-	unsigned long h = hash(unsigned char *)key);
-	int step = 1 + (h % (tableSize - 1)); // make sure step != 0 common pattern
-	return step
-}
 
+typedef struct  {
 
-// hasj function from stacoverflow.com
+    // Add data members for hash table here.
+	char **keys; // array of pointers to date strings
+	float *values; //array of floats
+	int size; // total number of slots in the table
+
+}HashTableDictionary;
+
+// hash function from stacoverflow.com
 unsigned long
 hash(unsigned char *str){
 	unsigned long hash = 5381;
@@ -56,44 +52,59 @@ hash(unsigned char *str){
 	return hash;
 }
 
-typedef struct  {
+//building helper functions
+// h1(key) -> starting index
+int h1(char *key, int tableSize){
+	unsigned long h = hash((unsigned char *) key);
+	return h % tableSize;
+}
 
-    // Add data members for hash table here.
-	char **key; // array of pointers to date strings
-	float *values; //array of floats
-	int size; // total number of slots in the table
+//h2(key) -> step size of probling - h2() calculate how much to jump when there's a collision
+int h2(char *key, int tableSize){
+	unsigned long h = hash((unsigned char *) key);
+	int step = 1 + (h % (tableSize - 1)); // make sure step != 0 common pattern
+	return step;
+}
 
-}HashTableDictionary;
 
-
-void HTInitialize(HashTableDictionary *ht, int numDates); {
+void HTInitialize(HashTableDictionary *ht) {
 
 	//set the size
-	tableSize = 2 * numDates;
-	ht->size = 2 * numDates;
+	ht->size = 2 * MAX_SIZE;
 
 	//allocate arrays
 	ht->keys = malloc(sizeof(char *) *  ht->size);
 	ht->values = malloc(sizeof(float) * ht->size);
 
 	// loop from 0 to ht->size - 1
-	for (int i = 0; i<size - 1; i++){
+	for (int i = 0; i < ht->size; i++) {
 		ht->keys[i] = NULL;
 		ht->values[i] = 0.0f; // just for cleanliness
 
+	}
+
 }
 
-void HTStore(HashTableDictionary *ht, char *key, float value); {
+void HTStore(HashTableDictionary *ht, char *key, float value) {
 
 	//compute
 	int index = h1(key, ht->size);
 	int step = h2(key, ht->size);
 	// loop up to ht->size times (to avoid infinite loop)
-	for(int i = 0; i<ht->size; i++){
+	while(ht->keys[index] != NULL){
+		if (strcmp(key, ht->keys[index]) == 0) {
+			ht->values[index] = value;
+			return ;
+		}
+	    index = (index + step) % ht->size;
+
+	}
+
+	
 
 }
 
-void HTFetch(HashTableDictionary *ht, char key); {
+void HTFetch(HashTableDictionary *ht, char key) {
 
 }
 
