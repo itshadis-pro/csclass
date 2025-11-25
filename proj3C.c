@@ -51,7 +51,7 @@ hash(unsigned char *str){
 
 	return hash % MAX_SIZE;
 }
-unsigned long
+unsigned long // second hash function. credit to LA Makani.
 hash1(unsigned char *str){
 
 	unsigned long hash1 = 0;
