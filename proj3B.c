@@ -19,13 +19,16 @@
  */
 
 /* Linked List-Based Dictionary
- *   Big O Store Time: 
- *   Actual Store Time: (put your runtime here, in seconds)
- *   Do you believe this result makes sense?   (Y/N)
+ *   Big O Store Time: O(n) // worst case, checks for existing key
+ *   Actual Store Time: (0.105942)
+ *   Do you believe this result makes sense?   (Y)
+	We scan the list to check if the key exists before inserting, so store can take linear time when the list is long.
  *
- *   Big O Fetch Time: 
- *   Actual Fetch Time: (put your runtime here, in seconds)
- *   Do you believe this result makes sense?   (Y/N)
+ *   Big O Fetch Time: O(n) // worst case
+ *   Actual Fetch Time: (0.110635)
+ *   Do you believe this result makes sense?   (Y)
+	Fetch linearly scan the table, so its much slower than Hash Table and similar scale to 
+	 array-based dictionary fetch.
  */
 
 /* Hash Table-Based Dictionary
@@ -104,6 +107,118 @@ typedef struct  {
 	int size; // total number of slots in the table
 
 }HashTableDictionary;
+
+typedef struct Node {
+
+	char *key;
+	float value;
+	struct Node *next;
+
+}Node;
+
+typedef struct {
+
+	Node *head;
+
+}LinkedListDictionary;
+
+void LLInitialize(LinkedListDictionary *ld){
+
+	ld->head = NULL;
+
+}
+
+void LLStore(LinkedListDictionary *ld, char *key, float value){
+
+	Node *curr = ld->head;
+
+	//check if key already exisits
+	while(curr != NULL) {
+	  if (strcmp(curr->key, key) == 0){
+	 	curr->value = value; //update
+		return;
+		}
+	curr  = curr->next;
+	}
+
+	//Not found ---> create new node at head
+	Node  *new_node = malloc(sizeof(Node));
+	new_node->key = key;
+	new_node->value = value;
+	new_node->next = ld->head;
+	ld->head = new_node;
+
+}
+
+float LLFetch(LinkedListDictionary *ld, char *key){
+
+
+	Node *curr = ld->head;
+
+	while(curr != NULL) {
+	  if (strcmp(curr->key, key) == 0){
+	 	return curr->value;
+		}
+	curr  = curr->next;
+	}
+
+	return 0.0; //Not found
+}
+
+void AnalyzeWithLinkedListDictionary(char **dates, float *values, int numDates){
+
+    LinkedListDictionary ld;
+    LLInitialize(&ld);
+    float storeTime = 0., fetchTime = 0.;
+
+
+       struct timeval startTime;
+       struct timeval endTime;
+    /* Add some timings around this. */
+
+    gettimeofday(&startTime, 0);
+    for (int i = 0 ; i < numDates ; i++)
+       LLStore(&ld, dates[i], values[i]);
+   // printf("Store time with Linked List-Based Dictionary is %f\n", storeTime);
+    gettimeofday(&endTime, 0);
+
+	storeTime = (endTime.tv_sec - startTime.tv_sec) +
+		(endTime.tv_usec - startTime.tv_usec) / 1000000.0;
+
+  printf("Store time with Linked List Dictionary is %f\n", storeTime);
+
+    /* You should add some timings around this loop. */
+  gettimeofday(&startTime, 0);
+  for (int i = 0 ; i < NUM_DATES ; i++)
+    {
+        /*
+        //  For each date, do a fetch and compare against the correct number.
+        //  DO NOT TOUCH ANY CODE IN THIS LOOP.
+        */
+        int idx = (4*i)%NUM_DATES;
+        float val = LLFetch(&ld, correct_dates[idx]);
+        float op  = correct_open_price[idx];
+        if (val != op)
+        {
+            if (op < 0.)
+            {
+                /* fake date not contained in DJIA file -- just continue */
+                continue;
+            }
+
+            printf("Bad fetch of date %s, correct val is %0.02f, but you returned %0.02f!\n",
+                    correct_dates[idx], op, val);
+            exit(EXIT_FAILURE);
+        }
+    }
+    gettimeofday(&endTime, 0);
+
+	fetchTime = (endTime.tv_sec - startTime.tv_sec) +
+		(endTime.tv_usec - startTime.tv_usec) / 1000000.0;
+    printf("All fetches matched for Linked List-Based Dictionary, time is %f!\n", fetchTime);
+}
+
+
 
 // hash function from stacoverflow.com
 unsigned long
@@ -408,5 +523,6 @@ int main()
 }*/
 
     AnalyzeWithHashTableDictionary(dates, values, count);
+	AnalyzeWithLinkedListDictionary(dates, values, count);
 	AnalyzeWithArrayDictionary(dates, values, count);
 }

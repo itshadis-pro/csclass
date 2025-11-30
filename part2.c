@@ -10,7 +10,7 @@
  *   Actual Store Time: (0.000193)
  *   Do you believe this result makes sense? (Y) Store only do two operations for n times , that is why it is very fast.
 	No matter how big the array is, Store() will do the same operation each time.
-	Also The timing to store in Array-based dict is less operations than Hash table dictionary store() which explains the number we got. 
+	The timing to store in Array-based dict is less operations than Hash table dictionary store() which explains the number we got. 
  *
  *   Big O Fetch Time: O(n) // worst case
  *   Actual Fetch Time: (1.555387)
@@ -43,28 +43,7 @@
  */
 
 /* Additional studies:
-
-	Experiement 1 (Dumb hash function):
-	Here I just returned 0 in my hash function and got these numbers.
-	This made all keys collide into the same location, forcing long probe sequence.
-
- *    	Store time with Hash Table Dictionary is 0.114006
-	All fetches matched, time is 0.126501!
-	Store time with Array-Based Dictionary is 0.000074
-	All fetches matched, time is 0.091650!
-
-	Experiment 2 (Shrinking ht->size in HTInitialized):
-	ht->size = NUM_DATES;
-
-	I got Segmentation fault message.
- 
-	Explaination:
-	With a much smaller table size, the load factor became very high and
-	collisions increased dramatically. The probing loop eventually ran enough
-	steps to move outside valid memory, causing a segmentation fault. This
-	demonstrates why hash tables need enough empty space for safe probing and
-	why small table sizes can break the worst-case behavior.
-
+ *    Leave this blank if you did no additional studies.
  */
 
 #include <stdio.h>
@@ -108,14 +87,17 @@ typedef struct  {
 // hash function from stacoverflow.com
 unsigned long
 hash(unsigned char *str){
-	unsigned long hash = 5381;
-	int c;
+        unsigned long hash = 5381;
 
-	while(c = *str++)
-		hash = ((hash << 5) +hash) + c; /* hash * 33 + c */
+        int c;
 
-	return hash % MAX_SIZE;
+        while(c = *str++)
+                hash = ((hash << 5) +hash) + c; /* hash * 33 + c */
+
+        return hash % MAX_SIZE;
 }
+
+
 unsigned long // second hash function. credit to LA Makani.
 hash1(unsigned char *str){
 
@@ -145,7 +127,7 @@ int h2(char *key, int tableSize){
 void HTInitialize(HashTableDictionary *ht) {
 
 	//set the size
-	ht->size = 2 * MAX_SIZE;
+	ht->size = NUM_DATES;
 
 	//allocate arrays
 	ht->keys = malloc(sizeof(char *) *  ht->size);
