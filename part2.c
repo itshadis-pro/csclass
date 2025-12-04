@@ -10,7 +10,7 @@
  *   Actual Store Time: (0.000193)
  *   Do you believe this result makes sense? (Y) Store only do two operations for n times , that is why it is very fast.
 	No matter how big the array is, Store() will do the same operation each time.
-	The timing to store in Array-based dict is less operations than Hash table dictionary store() which explains the number we got. 
+	Also The timing to store in Array-based dict is less operations than Hash table dictionary store() which explains the number we got. 
  *
  *   Big O Fetch Time: O(n) // worst case
  *   Actual Fetch Time: (1.555387)
@@ -19,13 +19,16 @@
  */
 
 /* Linked List-Based Dictionary
- *   Big O Store Time: 
- *   Actual Store Time: (put your runtime here, in seconds)
- *   Do you believe this result makes sense?   (Y/N)
+ *   Big O Store Time: O(n) // worst case, checks for existing key
+ *   Actual Store Time: (0.105942)
+ *   Do you believe this result makes sense?   (Y)
+	We scan the list to check if the key exists before inserting, so store can take linear time when the list is long.
  *
- *   Big O Fetch Time: 
- *   Actual Fetch Time: (put your runtime here, in seconds)
- *   Do you believe this result makes sense?   (Y/N)
+ *   Big O Fetch Time: O(n) // worst case
+ *   Actual Fetch Time: (0.110635)
+ *   Do you believe this result makes sense?   (Y)
+	Fetch linearly scan the table, so its much slower than Hash Table and similar scale to 
+	 array-based dictionary fetch.
  */
 
 /* Hash Table-Based Dictionary
@@ -43,7 +46,30 @@
  */
 
 /* Additional studies:
- *    Leave this blank if you did no additional studies.
+
+	Experiement 1 (Dumb hash function):
+	Here I just returned 0 in my hash function and got these numbers.
+	This made all keys collide into the same location, forcing long probe sequence.
+
+ *    	Store time with Hash Table Dictionary is 0.114006
+	All fetches matched, time is 0.126501!
+	Store time with Array-Based Dictionary is 0.000074
+	All fetches matched, time is 0.091650!
+
+	Experiment 2 (Shrinking ht->size in HTInitialized):
+	ht->size = NUM_DATES;
+
+	I got Segmentation fault message.
+ 
+	Explaination:
+	With a much smaller table size, the load factor became very high and
+	collisions increased dramatically. The probing loop eventually ran enough
+	steps to move outside valid memory, causing a segmentation fault. This
+	demonstrates why hash tables need enough empty space for safe probing and
+	why small table sizes can break the worst-case behavior.
+
+
+	Experiment 3 (
  */
 
 #include <stdio.h>
@@ -75,127 +101,75 @@ typedef struct
 
 
 
-typedef struct  {
+/*typedef struct  {
 
     // Add data members for hash table here.
 	char **keys; // array of pointers to date strings
 	float *values; //array of floats
 	int size; // total number of slots in the table
 
-}HashTableDictionary;
+}HashTableDictionary; */
 
-// hash function from stacoverflow.com
-unsigned long
-hash(unsigned char *str){
-        unsigned long hash = 5381;
+typedef struct Node {
 
-        int c;
+	char *key;
+	float value;
+	struct Node *next;
 
-        while(c = *str++)
-                hash = ((hash << 5) +hash) + c; /* hash * 33 + c */
+}Node;
 
-        return hash % MAX_SIZE;
-}
+typedef struct {
 
+	Node *head;
 
-unsigned long // second hash function. credit to LA Makani.
-hash1(unsigned char *str){
+}LinkedListDictionary;
 
-	unsigned long hash1 = 0;
+void LLInitialize(LinkedListDictionary *ld){
 
-	for(int i = 0; i < strlen(str); i++){
-		hash1 += str[i];
-	}
-		return 997 - (hash1 % 997);
-}
-
-//building helper functions
-// h1(key) -> starting index
-int h1(char *key, int tableSize){
-	unsigned long h = hash((unsigned char *) key);
-	return h % tableSize;
-}
-
-//h2(key) -> step size of probling - h2() calculate how much to jump when there's a collision
-int h2(char *key, int tableSize){
-	unsigned long h = hash1((unsigned char *) key);
-	int step = 1 + (h % (MAX_SIZE - 2)); // make sure step != 0 common pattern
-	return h;
-}
-
-
-void HTInitialize(HashTableDictionary *ht) {
-
-	//set the size
-	ht->size = NUM_DATES;
-
-	//allocate arrays
-	ht->keys = malloc(sizeof(char *) *  ht->size);
-	ht->values = malloc(sizeof(float) * ht->size);
-
-	// loop from 0 to ht->size - 1
-	for (int i = 0; i < ht->size; i++) {
-		ht->keys[i] = NULL;
-		ht->values[i] = 0.0f; // just for cleanliness
-
-	}
+	ld->head = NULL;
 
 }
 
-void HTStore(HashTableDictionary *ht, char *key, float value) {
+void LLStore(LinkedListDictionary *ld, char *key, float value){
 
-	//compute
-	int index = h1(key, ht->size);
-	int step = h2(key, ht->size);
+/*	Node *curr = ld->head;
 
-	int counter = 0; // we want to count the number of collisions
-	// loop up to ht->size times (to avoid infinite loop)
-	while(ht->keys[index] != NULL){
-		if (strcmp(key, ht->keys[index]) == 0) {
-			ht->values[index] = value;
-			return;
+	check if key already exisits
+	while(curr != NULL) {
+	  if (strcmp(curr->key, key) == 0){
+	 	curr->value = value; //update
+		return;
 		}
-	if (counter < max_num)	// if we have a suffiecient collision switch to more robust probing method
-	    index = (index + step) % MAX_SIZE; //prob initial
-		else index = (index + 1)  % MAX_SIZE; // second prob robust 
-		counter ++; // increment the counter 
-	}
+	curr  = curr->next;
+	}*/
 
-	ht->keys[index] = key;
-	ht->values[index] = value;
-	ht->size ++;
-
-//	printf("%d this is index\n", index);
-
+	//Not found ---> create new node at head
+	Node  *new_node = malloc(sizeof(Node));
+	new_node->key = key;
+	new_node->value = value;
+	new_node->next = ld->head;
+	ld->head = new_node;
 }
 
-float  HTFetch(HashTableDictionary *ht, char *key) {
+float LLFetch(LinkedListDictionary *ld, char *key){
 
-	//compute
-	int index = h1(key, ht->size);
-	int step = h2(key, ht->size);
-	int counter = 0;
 
-	// loop up to ht->size times (to avoid infinite loop)
-	while(ht->keys[index] != NULL){
-		if (strcmp(key, ht->keys[index]) == 0) {
-			return ht->values[index]; // we return the matched key value
+	Node *curr = ld->head;
+
+	while(curr != NULL) {
+	  if (strcmp(curr->key, key) == 0){
+	 	return curr->value;
 		}
-	if (counter < max_num)
-	    index = (index + step) % MAX_SIZE;
-		else index = (index + 1)  % MAX_SIZE;
-		counter ++;
-		}
-
-	return 0; // if no match found just return 0
-
+	curr  = curr->next;
 	}
 
+	return 0.0; //Not found
+}
 
-void AnalyzeWithHashTableDictionary(char **dates, float *values,int numDates)
-{
-    HashTableDictionary ht;
-    HTInitialize(&ht);
+void AnalyzeWithLinkedListDictionary(char **dates, float *values, int numDates){
+
+    LinkedListDictionary ld;
+    LLInitialize(&ld);
     float storeTime = 0., fetchTime = 0.;
 
 
@@ -205,14 +179,14 @@ void AnalyzeWithHashTableDictionary(char **dates, float *values,int numDates)
 
     gettimeofday(&startTime, 0);
     for (int i = 0 ; i < numDates ; i++)
-        HTStore(&ht, dates[i], values[i]);
-   // printf("Store time with Array-Based Dictionary is %f\n", storeTime);
+       LLStore(&ld, dates[i], values[i]);
+   // printf("Store time with Linked List-Based Dictionary is %f\n", storeTime);
     gettimeofday(&endTime, 0);
 
 	storeTime = (endTime.tv_sec - startTime.tv_sec) +
 		(endTime.tv_usec - startTime.tv_usec) / 1000000.0;
 
-  printf("Store time with Hash Table Dictionary is %f\n", storeTime);
+  printf("Store time with Linked List Dictionary is %f\n", storeTime);
 
     /* You should add some timings around this loop. */
   gettimeofday(&startTime, 0);
@@ -223,7 +197,7 @@ void AnalyzeWithHashTableDictionary(char **dates, float *values,int numDates)
         //  DO NOT TOUCH ANY CODE IN THIS LOOP.
         */
         int idx = (4*i)%NUM_DATES;
-        float val = HTFetch(&ht, correct_dates[idx]);
+        float val = LLFetch(&ld, correct_dates[idx]);
         float op  = correct_open_price[idx];
         if (val != op)
         {
@@ -242,8 +216,10 @@ void AnalyzeWithHashTableDictionary(char **dates, float *values,int numDates)
 
 	fetchTime = (endTime.tv_sec - startTime.tv_sec) +
 		(endTime.tv_usec - startTime.tv_usec) / 1000000.0;
-    printf("All fetches matched, time is %f!\n", fetchTime);
+    printf("All fetches matched for Linked List-Based Dictionary, time is %f!\n", fetchTime);
 }
+
+
 
 
 void Initialize(ArrayDictionary *ad)
@@ -389,6 +365,7 @@ int main()
 /	printf(dates[i]);
 }*/
 
-    AnalyzeWithHashTableDictionary(dates, values, count);
+//    AnalyzeWithHashTableDictionary(dates, values, count);
+	AnalyzeWithLinkedListDictionary(dates, values, count);
 	AnalyzeWithArrayDictionary(dates, values, count);
 }
