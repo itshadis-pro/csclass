@@ -1,7 +1,7 @@
 // Name: Hadi Almarzooq
 // Class: CS 212
-// Assignment: Project2D
-//Due: 10/24/2025
+// Assignment: Proj3E
+//Due: 12/06/2025
 
 #include <stdio.h>
 #include <stdlib.h>
